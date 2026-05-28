@@ -1,6 +1,19 @@
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
+
+  let supabaseStatus: string;
+  if (error) {
+    supabaseStatus = `Supabase: error - ${error.message}`;
+  } else if (data.user) {
+    supabaseStatus = `Supabase: connected as ${data.user.email}`;
+  } else {
+    supabaseStatus = "Supabase: connected (no user)";
+  }
+
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
@@ -59,6 +72,9 @@ export default function Home() {
             Documentation
           </a>
         </div>
+        <p className="mt-8 w-full rounded-lg bg-zinc-100 px-4 py-3 text-sm text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+          {supabaseStatus}
+        </p>
       </main>
     </div>
   );
